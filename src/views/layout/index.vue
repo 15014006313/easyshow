@@ -26,8 +26,10 @@
       </a-layout-header>
       <a-layout-content>
         <a-breadcrumb>
-          <a-breadcrumb-item>User</a-breadcrumb-item>
-          <a-breadcrumb-item>Bill</a-breadcrumb-item>
+          <a-breadcrumb-item>易学</a-breadcrumb-item>
+          <template v-for="breadcrumb in breadcrumbList" :key="`breadcrumb-${breadcrumb.uri}`">
+            <a-breadcrumb-item>{{ breadcrumb.title }}</a-breadcrumb-item>
+          </template>
         </a-breadcrumb>
         <div :style="{ padding: '12px 24px', background: '#fff', minHeight: '100%' }">
           <router-view></router-view>
@@ -40,9 +42,9 @@
   </a-layout>
 </template>
 <script lang="ts">
-  import { ref } from "vue";
-  import { defineComponent } from "vue";
-  import { useRouter } from "vue-router";
+  import { reactive, ref } from "vue";
+  import { defineComponent, watch } from "vue";
+  import { RouteRecordName, useRoute, useRouter } from "vue-router";
   export default defineComponent({
     components: {},
     setup() {
@@ -54,65 +56,100 @@
       const routeClick = (path: string) => {
         router.push({ path });
       };
+      interface menu {
+        icon?: string;
+        title: string;
+        id: string;
+        uri?: string;
+        route?: string;
+        children?: menu[];
+      }
+      const menuList: menu[] = [
+        {
+          icon: "pie-chart-outlined",
+          title: "首页",
+          id: "10001",
+          uri: "dashboard",
+          route: "/dashboard"
+        },
+        {
+          icon: "desktop-outlined",
+          title: "Option 2",
+          id: "10002",
+          uri: "teacher",
+          route: "/teacher"
+        },
+        {
+          icon: "user-outlined",
+          title: "User",
+          id: "10003",
+          uri: "student",
+          route: "/student"
+        },
+        {
+          icon: "team-outlined",
+          title: "Team",
+          id: "10004",
+          children: [
+            {
+              title: "Team A",
+              id: "20004"
+            },
+            {
+              title: "Team B",
+              id: "20005"
+            }
+          ]
+        },
+        {
+          icon: "file-outlined",
+          title: "File",
+          id: "10005"
+        }
+      ];
+
+      const getCurrentRoute = (list: menu[], name: RouteRecordName | null | undefined): menu | undefined => {
+        let current: menu | undefined = undefined;
+        list.forEach((menu: menu) => {
+          if (menu.uri == name) {
+            current = menu;
+            breadcrumbList.push(menu);
+          } else if (menu.children?.length) {
+            let sub = getCurrentRoute(menu.children, name);
+            if (sub) {
+              current = sub;
+              breadcrumbList.push(menu);
+              breadcrumbList.push(sub);
+            }
+          }
+        });
+        return current;
+      };
+
+      const route = useRoute();
+
+      const breadcrumbList = reactive<menu[]>([]);
+
+      let selectedKeys = reactive<string[]>([]);
+
+      watch(
+        () => route.name,
+        (name) => {
+          breadcrumbList.length = 0;
+          const menu: menu | undefined = getCurrentRoute(menuList, name);
+          selectedKeys = breadcrumbList.map((e) => e.id);
+          menu && (document.title = `${menu.title || menu.uri} - 易学`);
+        },
+        { immediate: true }
+      );
 
       return {
         showMenu,
         routeClick,
         collapsed,
-        selectedKeys: ref<string[]>(["10001"]),
-        menuList: [
-          {
-            icon: "pie-chart-outlined",
-            title: "首页",
-            id: "10001"
-          },
-          {
-            icon: "desktop-outlined",
-            title: "Option 2",
-            id: "10002",
-            uri: "teacher",
-            route: "/teacher"
-          },
-          {
-            icon: "user-outlined",
-            title: "User",
-            id: "10003",
-            children: [
-              {
-                title: "Tom",
-                id: "20001"
-              },
-              {
-                title: "Bill",
-                id: "20002"
-              },
-              {
-                title: "Alex",
-                id: "20003"
-              }
-            ]
-          },
-          {
-            icon: "team-outlined",
-            title: "Team",
-            id: "10004",
-            children: [
-              {
-                title: "Team A",
-                id: "20004"
-              },
-              {
-                title: "Team B",
-                id: "20005"
-              }
-            ]
-          },
-          {
-            icon: "file-outlined",
-            title: "File",
-            id: "10005"
-          }
-        ]
+        menuList,
+        breadcrumbList,
+        selectedKeys
       };
     }
   });

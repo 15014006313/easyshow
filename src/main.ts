@@ -11,6 +11,7 @@ const app = createApp(App);
 
 app.use(Antd).use(store).use(router).mount('#app');
 
+
 const icons: any = antIcons;
 
 Object.keys(icons).forEach(key => {

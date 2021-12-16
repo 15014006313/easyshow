@@ -20,8 +20,16 @@ const routes: Array<RouteRecordRaw> = [
         path: '/teacher',
         name: 'teacher',
         component: () => import('@/views/teacher/index.vue')
+      },
+      {
+        path: '/student',
+        name: 'student',
+        component: () => import('@/views/student/index.vue')
       }
-    ]
+    ],
+    meta: {
+      auth: true
+    }
   },
   {
     path: '/login',
@@ -42,5 +50,18 @@ const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.length) {
+    const token: string | null = localStorage.getItem('EASYSHOW_TOKEN');
+    if (to.matched[0]?.meta?.auth && !token) {
+      next(`/login?from=${to.path}`);
+    } else {
+      next();
+    }
+  } else {
+    next("/dashboard");
+  }
+});
 
 export default router
