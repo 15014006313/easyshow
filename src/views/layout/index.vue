@@ -45,6 +45,7 @@
   import { reactive, ref } from "vue";
   import { defineComponent, watch } from "vue";
   import { RouteRecordName, useRoute, useRouter } from "vue-router";
+  import menus from "@/assets/data/menu";
   export default defineComponent({
     components: {},
     setup() {
@@ -64,49 +65,7 @@
         route?: string;
         children?: menu[];
       }
-      const menuList: menu[] = [
-        {
-          icon: "pie-chart-outlined",
-          title: "首页",
-          id: "10001",
-          uri: "dashboard",
-          route: "/dashboard"
-        },
-        {
-          icon: "desktop-outlined",
-          title: "Option 2",
-          id: "10002",
-          uri: "teacher",
-          route: "/teacher"
-        },
-        {
-          icon: "user-outlined",
-          title: "User",
-          id: "10003",
-          uri: "student",
-          route: "/student"
-        },
-        {
-          icon: "team-outlined",
-          title: "Team",
-          id: "10004",
-          children: [
-            {
-              title: "Team A",
-              id: "20004"
-            },
-            {
-              title: "Team B",
-              id: "20005"
-            }
-          ]
-        },
-        {
-          icon: "file-outlined",
-          title: "File",
-          id: "10005"
-        }
-      ];
+      const menuList: menu[] = menus;
 
       const getCurrentRoute = (list: menu[], name: RouteRecordName | null | undefined): menu | undefined => {
         let current: menu | undefined = undefined;
